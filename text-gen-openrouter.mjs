@@ -5,7 +5,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
 });
 
-const completion = await openai.chat.completions.create({
+const stream = await openai.chat.completions.create({
   model: "openai/gpt-4o-mini",
   messages: [
     {
@@ -14,12 +14,18 @@ const completion = await openai.chat.completions.create({
     },
     {
       role: "user",
-      content: "Розкажи жарт про програмістів",
+      content: "Розкажи щось цікаве про акул",
     },
   ],
+  stream: true,
   store: true,
 });
 
-console.log(completion.choices[0].message);
+for await (const chunk of stream) {
+  const content = chunk.choices[0]?.delta?.content;
+  if (content) {
+    process.stdout.write(content);
+  }
+}  
 //To RUN:
 //node --env-file=.env ./text-gen-openrouter.mjs
